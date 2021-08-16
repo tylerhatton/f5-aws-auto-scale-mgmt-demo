@@ -28,3 +28,4 @@ jobs:
         with:
           playbook: site.yml
           directory: ./
+          requirements: requirements.yml
