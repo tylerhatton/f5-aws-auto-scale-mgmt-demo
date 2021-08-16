@@ -27,3 +27,5 @@ jobs:
           playbook: site.yml
           directory: ./
           requirements: requirements.yml
+          options: |
+            --verbose
