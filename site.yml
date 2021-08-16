@@ -10,6 +10,7 @@
     - name: Install boto3
       pip:
         name: boto3
+        executable: /opt/pipx/venvs/ansible-core/bin/pip
 
     - name: Get autoscaling group
       ec2_asg_info:
