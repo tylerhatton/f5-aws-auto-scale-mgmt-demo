@@ -19,6 +19,8 @@ jobs:
       AWS_BUCKET_NAME: "default-judmf-bigip-1arm-as3"
       BIGIP_PORT: "8443"
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
       - name: Run playbook
         env:
           BIGIP_USERNAME: Mon
