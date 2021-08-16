@@ -1,0 +1,67 @@
+---
+- name: Populate big-ip inventory
+  hosts: localhost
+  gather_facts: false
+  collections:
+    - community.aws
+  vars:
+    instance_ids: []
+  tasks:
+    - name: Get autoscaling group
+      ec2_asg_info:
+        name: "default-bigip-1arm-asg"
+      register: asgs
+
+    - name: Create EC2 instance ID list
+      set_fact:
+        instance_ids: "{{ instance_ids + [ item['instance_id'] ] }}"
+      loop: "{{ asgs['results'][0]['instances'] }}"
+
+    - name: Get EC2 instance info
+      ec2_instance_info:
+        instance_ids: "{{ instance_ids }}"
+      register: instances
+
+    - name: Populate BIG-IP Inventory
+      add_host:
+        hostname: "{{ item['public_ip_address'] }}"
+        groups: "bigips"
+        ansible_host: "{{ item['public_ip_address'] }}"
+        ansible_httpapi_port: "{{ lookup('env','BIGIP_PORT') }}"
+      loop: "{{ instances['instances'] }}"
+
+- name: Apply AS3 Declarations
+  hosts: bigips
+  connection: httpapi
+  strategy: free
+  gather_facts: false
+  collections:
+    - f5networks.f5_bigip
+  vars:
+    ansible_user: "{{ lookup('env','BIGIP_USERNAME') }}"
+    ansible_httpapi_password: "{{ lookup('env','BIGIP_PASSWORD') }}"
+    ansible_network_os: f5networks.f5_bigip.bigip
+    ansible_httpapi_use_ssl: true
+    ansible_httpapi_validate_certs: "{{ validate_certs | default(false) }}"
+  tasks:
+    - name: Apply AS3 Declarations
+      bigip_as3_deploy:
+        content: "{{ lookup('file', item) }}"
+      with_fileglob:
+        - "{{ playbook_dir }}/as3_declarations/*"
+
+- name: Upload AS3 Declarations to S3
+  hosts: localhost
+  gather_facts: false
+  collections:
+    - community.aws
+  tasks:
+    - name: Upload AS3 Declaration
+      aws_s3:
+        bucket: "{{ lookup('env','AWS_BUCKET_NAME') }}"
+        object: "as3-declarations/{{ item.split('/')[-1] }}"
+        src: "{{ item }}"
+        overwrite: different
+        mode: put
+      with_fileglob:
+        - "{{ playbook_dir }}/as3_declarations/*"
