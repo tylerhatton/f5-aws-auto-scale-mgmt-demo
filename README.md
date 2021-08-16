@@ -1,3 +1,1 @@
-autoscaling group name
-s3 bucket name
-declaration folder
+# F5 AWS Auto Scaling Day-2 Management Demo
