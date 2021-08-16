@@ -27,6 +27,7 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_SECURITY_TOKEN: ${{ secrets.AWS_SECURITY_TOKEN }}
+          AWS_REGION: "us-west-1"
           BIGIP_USERNAME: ${{ secrets.BIGIP_USERNAME }}
           BIGIP_PASSWORD: ${{ secrets.BIGIP_PASSWORD }}
           AWS_BUCKET_NAME: "default-judmf-bigip-1arm-as3"
